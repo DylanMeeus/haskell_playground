@@ -79,3 +79,17 @@ test = [ (x, elemIndex x xs) | x <- xs]
 
 euler33 = [(fx, sx) | x <- xs, let t = (show (fst x) \\ show (snd x)) ++ (show (snd x) \\ show (fst x)), let r = read t :: Int, length t == 2, let fp = (div r 10), let lp = (mod r 10), lp /= 0, (fst x) / (snd x) == (fromIntegral fp / fromIntegral lp), let fx = floor (fst x), let sx = floor (snd x), mod fx 10 /= 0, mod sx 10 /= 0, fx > sx]
 	where xs = [ (x,y) | x <- [10..99], y <- [10..99]]
+
+
+-----------------
+--- reversible numbers below 1 billion
+--- 120 below 1000
+--- reversible = number + reverse = number of only add digits
+
+allDigitOdds :: Int -> Bool
+allDigitOdds x
+	     | x < 10 = odd x
+	     | otherwise = odd (mod x 10) && allDigitOdds (div x 10) 
+
+euler145 = length ([x | x <- xs])
+	 where xs = [sum | x <- [1..floor(10**9)], let sum = (x + read (reverse (show x)) :: Int), odd sum, (mod x 10) /= 0, allDigitOdds sum] 
