@@ -1,3 +1,6 @@
+test :: String
+test = "9 4 7 3"
+
 ex :: String
 ex = "3458 3471 163 1299 170 4200 2425 167 3636 4001 4162 115 2859 130 4075 4269\n\
 \      2777 2712 120 2569 2530 3035 1818 32 491 872 113 92 2526 477 138 1360\n\
@@ -22,5 +25,11 @@ diffMaxMin input = max - min
           min = minimum numbers
           numbers = map(\x -> (read x) :: Int)  $ words input
 
+dividesEvenly :: String -> Int
+dividesEvenly input = snd $ head $
+                      filter(\x -> fst x == 0) $ concat $
+                      map(\x -> [(mod x y, div x y) | y <- filter(\n -> n /= x) numbers]) numbers
+     where numbers = map(\x -> (read x) :: Int)  $ words input
+
 solve :: Int
-solve = sum $ map(\x -> diffMaxMin x) $ lines ex
+solve = sum $ map(\x -> dividesEvenly x) $ lines ex
