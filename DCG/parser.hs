@@ -9,10 +9,11 @@ import Data.Char
 data Variable = Variable {
     identifier :: String,
     value :: String
-}
+} deriving (Show)
 
 type Variables = [Variable]
 type Codelines = [String]
+type Codeline = String
 
 
 -- region <remove spaces>
@@ -41,6 +42,21 @@ remove_empty_lines :: Codelines -> Codelines
 remove_empty_lines codelines = filter(\x -> x /= []) codelines
 
 
+-- split on '=' and remove the ' ' chars around the variable
+create_variable :: Codeline -> Variable
+create_variable codeline = Variable identifier value
+    where 
+        identifier = takeWhile(\x -> x /= ' ') $ strip_leading_space codeline
+        value = takeWhile(\x -> x /= '\'') $ tail $  dropWhile(\x -> x /= '\'') codeline 
+
+
+-- scan for variable
+variable_scan :: Codelines -> Variables 
+variable_scan [] = []
+variable_scan codelines = map(\x -> create_variable x) loc_variables 
+    where loc_variables = filter(\x -> starts_with_ignore_space x '_') codelines
+
+
 -- remove lines we don't need
 sanitize :: Codelines-> Codelines
 sanitize codelines = init $ tail -- remove the first and last line (rule enclosures)  
@@ -49,7 +65,7 @@ sanitize codelines = init $ tail -- remove the first and last line (rule enclosu
         where x = map(\y -> strip_trailing_leading_space y) codelines
 
 parse :: String -> String
-parse input = intercalate " " loc 
+parse input = intercalate " " $ loc 
     where loc = sanitize $ lines input
 
 
