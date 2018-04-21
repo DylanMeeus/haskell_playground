@@ -14,6 +14,7 @@ data Variable = Variable {
 type Variables = [Variable]
 type Codelines = [String]
 type Codeline = String
+type Output = String
 
 
 -- region <remove spaces>
@@ -50,6 +51,24 @@ create_variable codeline = Variable identifier value
         value = takeWhile(\x -> x /= '\'') $ tail $  dropWhile(\x -> x /= '\'') codeline 
 
 
+extract_text :: String -> Int -> Int -> String
+extract_text input start stop = drop (start + 1) . take stop $ input
+
+find_pipes :: String -> [Int]
+find_pipes input = map(\t -> snd t) $ filter(\t -> fst t == '|') char_index 
+    where char_index = zip input [0..length input]
+
+
+textloc_scan_pipes :: String-> [Int] -> [Output]
+textloc_scan_pipes _ [] = []
+textloc_scan_pipes codeline (x:y:xs) = [extract_text codeline x y] 
+                                    ++ textloc_scan_pipes codeline xs
+
+textloc_scan :: Codelines -> [Output]
+textloc_scan codelines = textloc_scan_pipes joined_text pipes  
+    where pipes = find_pipes $ unlines codelines 
+          joined_text = unlines codelines
+
 -- scan for variable
 variable_scan :: Codelines -> Variables 
 variable_scan [] = []
@@ -66,7 +85,7 @@ sanitize codelines = init $ tail -- remove the first and last line (rule enclosu
 
 parse :: String -> String
 parse input = intercalate " " $ loc 
-    where loc = sanitize $ lines input
+    where loc = textloc_scan $ sanitize $ lines input
 
 
 main = do
